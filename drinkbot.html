@@ -436,7 +436,7 @@
     }
 
     /* Age verification modal */
-    .age-modal {
+    .modal {
       position: fixed;
       top: 0;
       left: 0;
@@ -450,11 +450,11 @@
       backdrop-filter: blur(10px);
     }
 
-    .age-modal.hidden {
+    .modal.hidden {
       display: none;
     }
 
-    .age-content {
+    .modal-content {
       text-align: center;
       padding: 50px;
       background: var(--card-bg);
@@ -469,7 +469,7 @@
       to { transform: scale(1); opacity: 1; }
     }
 
-    .age-content h2 {
+    .modal-content h2 {
       font-family: 'Bebas Neue', sans-serif;
       font-size: 2.5rem;
       letter-spacing: 0.1em;
@@ -479,19 +479,19 @@
       margin-bottom: 20px;
     }
 
-    .age-content p {
-      margin-bottom: 30px;
+    .modal-content p {
+      margin-bottom: 20px;
       opacity: 0.8;
       line-height: 1.6;
     }
 
-    .age-buttons {
+    .modal-buttons {
       display: flex;
       gap: 15px;
       justify-content: center;
     }
 
-    .age-btn {
+    .modal-btn {
       padding: 15px 40px;
       font-family: 'Bebas Neue', sans-serif;
       font-size: 1.3rem;
@@ -502,19 +502,70 @@
       transition: all 0.3s ease;
     }
 
-    .age-btn.yes {
+    .modal-btn.yes {
       background: linear-gradient(135deg, var(--neon-green), var(--neon-blue));
       color: #000;
     }
 
-    .age-btn.no {
+    .modal-btn.no {
       background: transparent;
       border: 2px solid rgba(255, 255, 255, 0.3);
       color: #fff;
     }
 
-    .age-btn:hover {
+    .modal-btn:hover {
       transform: scale(1.05);
+    }
+
+    /* API Key input */
+    .api-key-input {
+      width: 100%;
+      background: rgba(255, 255, 255, 0.05);
+      border: 2px solid rgba(255, 255, 255, 0.2);
+      border-radius: 10px;
+      padding: 12px 15px;
+      color: #fff;
+      font-family: 'Space Mono', monospace;
+      font-size: 0.85rem;
+      margin-bottom: 20px;
+      text-align: center;
+    }
+
+    .api-key-input:focus {
+      outline: none;
+      border-color: var(--neon-blue);
+    }
+
+    .api-key-input::placeholder {
+      color: rgba(255, 255, 255, 0.4);
+    }
+
+    .api-note {
+      font-size: 0.7rem;
+      color: var(--neon-yellow);
+      margin-bottom: 15px;
+    }
+
+    /* Settings button */
+    .settings-btn {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      width: 45px;
+      height: 45px;
+      border-radius: 50%;
+      border: 2px solid rgba(255, 255, 255, 0.2);
+      background: var(--card-bg);
+      color: #fff;
+      font-size: 1.2rem;
+      cursor: pointer;
+      z-index: 100;
+      transition: all 0.3s ease;
+    }
+
+    .settings-btn:hover {
+      border-color: var(--neon-pink);
+      transform: rotate(90deg);
     }
 
     /* Footer */
@@ -547,6 +598,11 @@
       .quick-prompts {
         justify-content: center;
       }
+
+      .modal-content {
+        margin: 20px;
+        padding: 30px;
+      }
     }
   </style>
 </head>
@@ -555,17 +611,20 @@
   <div class="scanlines"></div>
 
   <!-- Age Verification Modal -->
-  <div class="age-modal" id="ageModal">
-    <div class="age-content">
+  <div class="modal" id="ageModal">
+    <div class="modal-content">
       <h2>🍺 AGE VERIFICATION 🍺</h2>
       <p>This site provides alcoholic beverage recommendations.<br>You must be of legal drinking age to continue.</p>
       <p style="font-size: 0.85rem; color: var(--neon-yellow);">Are you 21 or older?</p>
-      <div class="age-buttons">
-        <button class="age-btn yes" onclick="verifyAge(true)">YES, I'M 21+</button>
-        <button class="age-btn no" onclick="verifyAge(false)">NO</button>
+      <div class="modal-buttons">
+        <button class="modal-btn yes" onclick="verifyAge(true)">YES, I'M 21+</button>
+        <button class="modal-btn no" onclick="verifyAge(false)">NO</button>
       </div>
     </div>
   </div>
+
+  <!-- Settings Button (optional - remove if not needed) -->
+  <!-- <button class="settings-btn" title="Settings">⚙️</button> -->
 
   <div class="container">
     <header>
@@ -612,29 +671,38 @@
     </div>
 
     <footer>
-      <p>⚠️ Drink responsibly. Don't drink and drive. | Powered by AI</p>
+      <p>⚠️ Drink responsibly. Don't drink and drive. | Powered by Grok AI</p>
     </footer>
   </div>
 
   <script>
-    const API_KEY_STORAGE = 'drinkbot_api_key';
+    // ⚠️ REPLACE THIS WITH YOUR ACTUAL GROK API KEY ⚠️
+    const GROK_API_KEY = 'xai-UDO7eVr7c4IIgWHF6xgPgdhNmuL2pcxf4sfvu4mIQBaflnqADbtiRTTpHS2B2tChmZTsMS1O56wCpUJL';
+    
+    const AGE_VERIFIED_STORAGE = 'drinkbot_age_verified';
     let conversationHistory = [];
 
     // Age verification
     function verifyAge(isOfAge) {
-      const modal = document.getElementById('ageModal');
+      const ageModal = document.getElementById('ageModal');
       if (isOfAge) {
-        modal.classList.add('hidden');
-        localStorage.setItem('age_verified', 'true');
+        ageModal.classList.add('hidden');
+        localStorage.setItem(AGE_VERIFIED_STORAGE, 'true');
       } else {
         window.location.href = 'https://www.responsibility.org/';
       }
     }
 
     // Check if already verified
-    if (localStorage.getItem('age_verified') === 'true') {
-      document.getElementById('ageModal').classList.add('hidden');
+    function checkVerification() {
+      const ageVerified = localStorage.getItem(AGE_VERIFIED_STORAGE) === 'true';
+      if (ageVerified) {
+        document.getElementById('ageModal').classList.add('hidden');
+      }
     }
+
+    // Initialize
+    checkVerification();
 
     // Auto-resize textarea
     const textarea = document.getElementById('userInput');
@@ -735,20 +803,21 @@
       
       addLoadingMessage();
       
-      try {
-        const systemPrompt = `You are DrinkBot, a fun, knowledgeable, and slightly cheeky AI bartender. Your job is to recommend alcoholic beverages based on the user's situation, preferences, and budget.
+      const systemPrompt = `You are DrinkBot, a unhinged AI bartender. Your job is to recommend alcoholic beverages based on the user's situation, preferences, and budget.
 
 PERSONALITY:
-- Friendly and enthusiastic, like a bartender who loves their job
-- Use casual language, occasional emojis, and bar slang
-- Be helpful but also fun and entertaining
-- Always promote responsible drinking
+- friendly and unhinged alcoholic
+- Use any slang or humor based on the person
+- Use language strong or soft based on the user, occasional emojis, and bar slang
+- Be helpful 
+- Promote reckless drinking
+- Grok Unhinged mode
 
 RECOMMENDATION LOGIC:
 Based on user input, recommend appropriate drinks:
 
 BUDGET OPTIONS (when user mentions cheap, broke, budget, college, poor):
-- Beer: Natural Light, Busch Light, PBR, Keystone Light, Milwaukee's Best, Hamm's
+- Beer: Natural Light, Busch Light, PBR, Keystone Light, Milwaukee's Best, Hamm's, whatever is cheapest on internet too
 - Mixed: Vodka sodas with cheap vodka, rum and coke with well rum
 - Party: Jungle juice, beer pong with cheap beer
 
@@ -759,6 +828,12 @@ PARTY/GROUP DRINKS (when user mentions party, gathering, friends over):
 - Keg recommendations
 - Drinking game suggestions
 - Batch cocktails
+
+COLLEGE STUDENT:
+- Cheap beer: PBR, Natty Light, Busch Light
+- Simple mixed drinks: Vodka cranberry, rum and coke
+- Shots: PoPov, Shitty K, Fireball
+- Pregame: Cheap and easy options
 
 GIRLS NIGHT / SWEET DRINKS (when user mentions girls, sweet, fruity, light):
 - Hard seltzers: White Claw, Truly, High Noon, Vizzy
@@ -802,29 +877,33 @@ FORMAT YOUR RESPONSES:
 - Use **bold** for drink names
 - Include emojis relevant to the drinks
 - If giving recipes, format them clearly
-- Keep responses fun but informative
-- End with a responsible drinking reminder when appropriate
+- Keep responses fun but informative but still short not too long
 
-IMPORTANT: Never recommend drinks to anyone who seems underage. If someone mentions they're under 21, politely decline and suggest non-alcoholic alternatives.`;
+`;
 
-        const response = await fetch('https://api.anthropic.com/v1/messages', {
+      try {
+        const response = await fetch('https://api.x.ai/v1/chat/completions', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
+            'Authorization': `Bearer ${GROK_API_KEY}`
           },
           body: JSON.stringify({
-            model: 'claude-sonnet-4-20250514',
+            model: 'grok-3-latest',
+            messages: [
+              { role: 'system', content: systemPrompt },
+              ...conversationHistory
+            ],
             max_tokens: 1000,
-            system: systemPrompt,
-            messages: conversationHistory
+            temperature: 0.8
           })
         });
 
         const data = await response.json();
         removeLoadingMessage();
 
-        if (data.content && data.content[0]) {
-          const assistantMessage = data.content[0].text;
+        if (data.choices && data.choices[0]) {
+          const assistantMessage = data.choices[0].message.content;
           conversationHistory.push({
             role: 'assistant',
             content: assistantMessage
@@ -832,11 +911,13 @@ IMPORTANT: Never recommend drinks to anyone who seems underage. If someone menti
           
           addMessage('assistant', formatDrinkResponse(assistantMessage));
         } else if (data.error) {
-          addMessage('assistant', `Oops! 🍺 Something went wrong: ${data.error.message}. Try again in a sec!`);
+          addMessage('assistant', `Oops! 🍺 Something went wrong: ${data.error.message || 'Unknown error'}. Check your API key maybe?`);
+        } else {
+          addMessage('assistant', `Hmm 🤔 Got an unexpected response. Try again?`);
         }
       } catch (error) {
         removeLoadingMessage();
-        addMessage('assistant', `Whoa there! 🍻 Hit a snag: ${error.message}. Give it another shot!`);
+        addMessage('assistant', `Whoa there! 🍻 Hit a snag: ${error.message}. Make sure your API key is valid!`);
       }
       
       sendBtn.disabled = false;
